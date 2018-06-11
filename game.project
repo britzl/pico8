@@ -3,7 +3,7 @@ title = Tweetjam
 dependencies = 
 
 [bootstrap]
-main_collection = /pico8/pico8.collectionc
+main_collection = /tweetjam/tweetjam.collectionc
 render = /pico8/render/pico8.renderc
 
 [display]
