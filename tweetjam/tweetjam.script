@@ -1,0 +1,261 @@
+local function spiralwhirl()
+	t=0
+	w=cos
+	z=sin
+	::_::
+	cls()t=t+.01
+	v=w(t/8)e=40*v*w(t)d=40*v*z(t)
+	for b=0,1,.001 do
+		l=60*b
+		m=l/2-t/2
+		k=l*z(m)j=l*w(m)o,p=k+e,j+d
+		r=sqrt(o*o+p*p)/60
+		s=z(r*v-t+3*atan2(o/50,p/50))
+		circ(64+k-4*s*r,64+j-5*s*r,2+2*s,8+l/4%7)
+	end
+	flip()goto _
+end
+
+
+local function wigglyspikes()
+	::_::
+	cls()
+	for k=7,1,-1 do
+		for i=-16,128,16 do
+			for j=-16,128,16 do
+				p=t()+i/256+j/128+.5*sin(t()/8)
+				s=sin(p)
+				c=cos(p)
+				circfill(i+8+j/16%2*8+2*(7-k)*c,j+8+2*(7-k)*s,k,6+k%7)
+			end
+		end
+	end
+	flip()
+	goto _
+end
+
+
+local function checkerboard_spiral()
+	t=0
+	w=cos
+	z=sin
+	::_::
+	cls()
+	t=t+.01
+	e=40*w(t)
+	d=40*z(t)
+	for b=0,1,.001 do
+		l=80*b
+		m=l/2-t/2
+		k=l*z(m)
+		j=l*w(m)
+		o,p=k+e,j+d
+		s=w(o/50+t)*z(p/50+t)
+		circ(64+k-s,64+j-s,1+2*s,8+l/4%3)
+	end
+	flip()
+	goto _
+end
+
+local function foo()
+	l={10,9,8,2,1}
+	::_::
+	cls()srand()for m=0,99 do
+		x=rnd(8)-4
+		z=rnd(8)-4
+		y=rnd(14)-7
+		for n=4,0,-1 do
+			a=t()/4+n*.01
+			b=t()/4+(n+1)*.01
+			c=cos(a)*x-sin(a)*z
+			d=sin(a)*x+cos(a)*z+7
+			g=64+(c*64)/d
+			h=64+(y*64)/d
+			circfill(g,h,max((7-d)+n/2,0),l[4-n+1])
+		end
+	end
+	flip()goto _
+end
+
+local function fun()
+	u=0
+	::_::
+	cls(1)x=0 y=0
+	e=0.6*cos(u)
+	for t=0,10,0.005 do
+		x=x+0.75*cos(e*t*sin(t)+(1-e)*t*cos(t))
+		y=y+0.75*sin(e*t*sin(t)+(1-e)*t*cos(t))
+		print(x,y)
+		pset(32+x+0.5*y,72+y-0.5*x,(t*20)%8+7)
+	end
+	u=u+0.005
+	flip()
+	goto _
+end
+
+local function kaleidoscope()
+	poke(0x5f2c,7)
+	s,c,t=sin,cos,0::_::cls()t=t+.01
+	a,r=5,32
+	for j=1, 64 do
+		for i=1, a do
+			z=-j*.2+64-14
+			line(z+s(t+i/a)*r,
+			z+c(t+i/a)*r,
+			z+s(t+(i-1)/a)*r,
+			z+c(t+(i-1)/a)*r,i+7)
+		end
+	end
+	flip()goto _ 
+end
+
+local function spiralistic_rainbow_flag()
+	::_::
+	cls()
+	for i=6,122,4 do
+		for j=6,122,4 do
+			n=64-i+24*cos(t()/4)
+			m=64-j+24*sin(t()/4)
+			r=sqrt(n*n+m*m)/64
+			a=atan2(n,m)
+			x=i+4*r*cos(r-a*7-t()*2)
+			y=j+4*r*sin(r-a*7-t()*2)
+			circ(x,y,1,7+5*r)
+		end
+	end
+	flip()
+	goto _ 
+end
+
+local function spirals()
+	::_::cls(2)a=-t()z=cos(a)w=sin(a)s=10+18*(sin(t()/15+.25)+1)b=63
+	for i=1,800,s do
+		print(i,s)
+		x=i/10*cos(a+i/100)y=i/10*sin(a+i/100)
+
+		x0 = z+b
+		y0 = w+b
+		x1 = x+b
+		y1 = y+b
+		print(x0,y0,x1,y1)
+		line(x0,y0,x1,y1,1)
+		--line(-z+b,-w+b,-x+b,-y+b,1)
+		z=x
+		w=y
+	end
+	flip()goto _ 
+end
+
+
+local function pico8(self)
+	PALETTE = {
+		[0] = { r =   0, g =   0, b =   0 },	-- black
+		[1] = { r =  29, g =  43, b =  83 },	-- dark-blue
+		[2] = { r = 126, g =  37, b =  83 },	-- dark-purple
+		[3] = { r =   0, g = 135, b =  81 },	-- dark-green
+		[4] = { r = 171, g =  82, b =  54 },	-- brown
+		[5] = { r =  95, g =  87, b =  79 },	-- dark-grey
+		[6] = { r = 194, g = 195, b = 199 },	-- light-grey
+		[7] = { r = 255, g = 241, b = 232 },	-- white
+		[8] = { r = 255, g =   0, b =  77 },	-- red
+		[9] = { r = 255, g = 163, b =   0 },	-- orange
+		[10] = { r = 255, g = 236, b =  39 },	-- yellow
+		[11] = { r =   0, g = 228, b =  54 },	-- green
+		[12] = { r =  41, g = 173, b = 255 },	-- blue
+		[13] = { r = 131, g = 118, b = 156 },	-- indigo
+		[14] = { r = 255, g = 119, b = 168 },	-- pink
+		[15] = { r = 255, g = 204, b = 170 },	-- peach
+	}
+	cos = math.cos
+	sin = math.sin
+	atan2 = math.atan2
+	sqrt = math.sqrt
+	srand = function(seed) math.randomseed(seed or os.time()) end
+	rnd = math.random
+	max = math.max
+	cls = function(color)
+		color = color or 0
+		local col = PALETTE[math.floor(color)]
+		drawpixels.fill(self.buffer_info, col.r, col.g, col.b)
+	end
+	circ = function(x, y, r, color)
+		color = color or 0
+		local col = PALETTE[math.floor(color)]
+		drawpixels.circle(self.buffer_info, x, y, r * 2, col.r, col.g, col.b, 255)
+	end
+	circfill = function(x, y, r, color)
+		color = color or 0
+		local col = PALETTE[math.floor(color)]
+		drawpixels.filled_circle(self.buffer_info, x, y, r * 2, col.r, col.g, col.b, 255)
+	end
+	pset = function(x, y, color)
+		color = color or 0
+		local col = PALETTE[math.floor(color)]
+		drawpixels.rect(self.buffer_info, x, y, 1, 1, col.r, col.g, col.b, 255)
+	end
+	line = function(x0, y0, x1, y1, color)
+		color = color or 0
+		local col = PALETTE[math.floor(color)]
+		drawpixels.line(self.buffer_info, x0, y0, x1, y1, col.r, col.g, col.b, 255)
+	end
+	self.host_time = 0
+	t = function() return self.host_time end
+	time = t
+	poke = function() print("Unsupported function poke") end
+	flip = function()
+		coroutine.yield()
+	end
+end
+
+
+function init(self)
+	msg.post("@render:", "clear_color", {color = vmath.vector4(1, 1, 1, 1)})
+	
+	local width = 128
+	local height = 128
+	local channels = 3
+
+	self.resource_path = go.get("#sprite", "texture0")
+
+	self.buffer_info = {
+		buffer = buffer.create(width * height, -- size of the buffer width*height
+		{
+			{
+				name = hash("my_buffer"),
+				type = buffer.VALUE_TYPE_UINT8,
+				count = 3 -- same as channels
+			}
+		}),
+		width = width,
+		height = height,
+		channels = channels
+	}
+
+	self.header = {
+		width = width,
+		height = height,
+		type = resource.TEXTURE_TYPE_2D,
+		format = resource.TEXTURE_FORMAT_RGB,
+		num_mip_maps = 1
+	}
+
+	self.host_time = 0
+	
+	pico8(self)
+	self.co = coroutine.create(spirals)
+end
+
+function update(self, dt)
+	print(dt)
+	self.host_time = self.host_time + dt
+	if self.host_time > 65536 then self.host_time = self.host_time - 65536 end
+	if self.co and coroutine.status(self.co) == "suspended" then
+		local ok, err = coroutine.resume(self.co)
+		if not ok then
+			print(err)
+			self.co = nil
+		end
+	end
+	
+	resource.set_texture(self.resource_path, self.header, self.buffer_info.buffer)
+end

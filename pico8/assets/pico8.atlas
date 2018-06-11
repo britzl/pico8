@@ -1,0 +1,6 @@
+images {
+  image: "/pico8/assets/images/bg.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

@@ -1,0 +1,245 @@
+local pico8 = require "pico8.pico8"
+
+local spiralwhirl = [[
+	t=0
+	w=cos
+	z=sin
+	::_::
+	cls()t=t+.01
+	v=w(t/8)e=40*v*w(t)d=40*v*z(t)
+	for b=0,1,.001 do
+		l=60*b
+		m=l/2-t/2
+		k=l*z(m)j=l*w(m)o,p=k+e,j+d
+		r=sqrt(o*o+p*p)/60
+		s=z(r*v-t+3*atan2(o/50,p/50))
+		circ(64+k-4*s*r,64+j-5*s*r,2+2*s,8+l/4%7)
+	end
+	flip()goto _
+]]
+
+
+local wigglyspikes = [[
+	::_::
+	cls()
+	for k=7,1,-1 do
+		for i=-16,128,16 do
+			for j=-16,128,16 do
+				p=t()+i/256+j/128+.5*sin(t()/8)
+				s=sin(p)
+				c=cos(p)
+				circfill(i+8+j/16%2*8+2*(7-k)*c,j+8+2*(7-k)*s,k,6+k%7)
+			end
+		end
+	end
+	flip()
+	goto _
+]]
+
+
+local checkerboard_spiral = [[
+t=0
+w=cos
+z=sin
+::_::
+cls()
+t=t+.01
+e=40*w(t)
+d=40*z(t)
+for b=0,1,.001 do
+	l=80*b
+	m=l/2-t/2
+	k=l*z(m)
+	j=l*w(m)
+	o,p=k+e,j+d
+	s=w(o/50+t)*z(p/50+t)
+	circ(64+k-s,64+j-s,1+2*s,8+l/4%3)
+end
+flip()
+goto _]]
+
+local comets = [[
+l={10,9,8,2,1}
+::_::
+cls()srand()for m=0,99 do
+	x=rnd(8)-4
+	z=rnd(8)-4
+	y=rnd(14)-7
+	for n=4,0,-1 do
+		a=t()/4+n*.01
+		b=t()/4+(n+1)*.01
+		c=cos(a)*x-sin(a)*z
+		d=sin(a)*x+cos(a)*z+7
+		g=64+(c*64)/d
+		h=64+(y*64)/d
+		circfill(g,h,max((7-d)+n/2,0),l[4-n+1])
+	end
+end
+flip()goto _ 
+]]
+
+
+local fun = [[
+	u=0
+	::_::
+	cls(1)x=0 y=0
+	e=0.6*cos(u)
+	for t=0,10,0.005 do
+		x=x+0.75*cos(e*t*sin(t)+(1-e)*t*cos(t))
+		y=y+0.75*sin(e*t*sin(t)+(1-e)*t*cos(t))
+		print(x,y)
+		pset(32+x+0.5*y,72+y-0.5*x,(t*20)%8+7)
+	end
+	u=u+0.005
+	flip()
+	goto _
+]]
+
+local function kaleidoscope()
+	poke(0x5f2c,7)
+	s,c,t=sin,cos,0::_::cls()t=t+.01
+	a,r=5,32
+	for j=1, 64 do
+		for i=1, a do
+			z=-j*.2+64-14
+			line(z+s(t+i/a)*r,
+			z+c(t+i/a)*r,
+			z+s(t+(i-1)/a)*r,
+			z+c(t+(i-1)/a)*r,i+7)
+		end
+	end
+	flip()goto _ 
+end
+
+local spiralistic_rainbow_flag = [[
+	::_::
+	cls()
+	for i=6,122,4 do
+		for j=6,122,4 do
+			n=64-i+24*cos(t()/4)
+			m=64-j+24*sin(t()/4)
+			r=sqrt(n*n+m*m)/64
+			a=atan2(n,m)
+			x=i+4*r*cos(r-a*7-t()*2)
+			y=j+4*r*sin(r-a*7-t()*2)
+			circ(x,y,1,7+5*r)
+		end
+	end
+	flip()
+	goto _ 
+]]
+
+local spirals = [[
+	::_::cls(2)a=-t()z=cos(a)w=sin(a)s=10+18*(sin(t()/15+.25)+1)b=63
+	for i=1,1000,s do
+		x=i/10*cos(a+i/100)y=i/10*sin(a+i/100)
+
+		line(-z+b,-w+b,-x+b,-y+b,1)
+		z=x
+		w=y
+	end
+	flip()goto _ 
+]]
+
+
+local interference = [[
+::_::
+cls(1)
+srand()
+for j=0,11 do
+	f=t()/2
+	x=rnd(128)+f*(128+sin(rnd())*16)
+	y=rnd(128)+(sin(f/2)+1)*4+f*(64+sin(rnd())*16)
+	z=rnd()*6
+	for i=0,64 do
+		pset((x-i*2)%128,(y+sin(f*.1-i/32+y/128)*(12+sin(f/2+z)*z*2))%128,12)
+	end
+end
+flip()goto _ 
+]]
+
+
+local lines = [[
+::_::cls(2)a=-t()z=cos(a)w=sin(a)s=10+18*(sin(t()/15+.25)+1)b=63
+for i=1,1000,s do
+	x=i/10*cos(a+i/100)y=i/10*sin(a+i/100)line(z+b,w+b,x+b,y+b,1)line(-z+b,-w+b,-x+b,-y+b,1)z=x
+	w=y
+end
+flip()goto _
+]]
+
+
+local carousel = [[
+v={-1,-1,1,-1,-1,1,1,1}
+i={2,0,1,3,1,0,2,3}
+function x(y,n)a=v[i[y]*2+1]b=v[i[y]*2+2]w=a*cos(n)q=2+a*sin(n)
+	return 64+(99*w)/q,64+(64*-b)/q
+end
+::_::
+cls()
+for k=1,8 do
+	u=(k-1)/16+t()/8
+	for j=1,#i,2 do
+		c,d=x(j,u)g,h=x(j+1,u)line(c,d,g,h,11)
+	end
+end
+flip()goto _
+]]
+
+local rotating_lights = [[
+n=circfill
+m=fillp
+::_::f=.15*t()cls()srand()
+for j=1,12 do
+	for i=2,20 do
+		y=.2-i/(5)g=y*y*.3+(sin(f)+1)*.5
+		k=j/12
+		w=cos(f+k)*g-sin(f+k)*g
+		q=sin(f+k)*g+cos(f+k)*g+5
+		a=64+64*w/q
+		b=64+64*y/q
+		m()n(a,b,6-q,8+((i-2)%7))m()n(a,64-b+64,6-q,1+(i%2))
+	end
+end
+flip()goto _ 
+]]
+
+function init(self)
+	msg.post("@render:", "clear_color", {color = vmath.vector4(1, 1, 1, 1)})
+
+	local width = 128
+	local height = 128
+	local channels = 3
+
+	self.resource_path = go.get("#sprite", "texture0")
+
+	self.buffer_info = {
+		buffer = buffer.create(width * height, -- size of the buffer width*height
+		{
+			{
+				name = hash("pico8screen"),
+				type = buffer.VALUE_TYPE_UINT8,
+				count = 3 -- same as channels
+			}
+		}),
+		width = width,
+		height = height,
+		channels = channels
+	}
+
+	self.header = {
+		width = width,
+		height = height,
+		type = resource.TEXTURE_TYPE_2D,
+		format = resource.TEXTURE_FORMAT_RGB,
+		num_mip_maps = 1
+	}
+
+	pico8.init(self.buffer_info)
+	pico8.run(rotating_lights)
+end
+
+function update(self, dt)
+	pico8.update(dt)
+	resource.set_texture(self.resource_path, self.header, self.buffer_info.buffer)
+end

@@ -1,0 +1,16 @@
+[project]
+title = Tweetjam
+dependencies = 
+
+[bootstrap]
+main_collection = /pico8/pico8.collectionc
+render = /pico8/render/pico8.renderc
+
+[display]
+width = 512
+height = 512
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
