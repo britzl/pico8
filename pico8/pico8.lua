@@ -33,8 +33,23 @@ end
 
 function M.run(cart)
 	if type(cart) == "string" then
-		cart = string.gsub(cart, "([%a_][%a%d_]-)(%b[])([%+%-])=", "%1%2=%1%2%3")
-		cart = string.gsub(cart, "([%a_][%a%d_]-)([%+%-])=", "%1=%1%2")
+		-- +=, -=, *= and /=
+		cart = string.gsub(cart, "([%a_][%a%d_]-)(%b[])([%+%-%*%/])=", "%1%2=%1%2%3")
+		cart = string.gsub(cart, "([%a_][%a%d_]-)([%+%-%*%/])=", "%1=%1%2")
+		
+		-- single line if-else
+		cart = string.gsub(cart, "if%s-(%b())(.-)\n", "if %1 then %2 end\n")
+
+		-- =.32 -> =0.32
+		cart = string.gsub(cart, "([,=%+%-&*%/])%.(%d-)", "%10.%2")
+				
+		-- fix compact assignments c=64q=96w=127l=line
+		cart = string.gsub(cart, "([%a_][%a%d_]-)=(%d+)", "%1=%2 ")
+
+		-- t=t+0.01cls(1) -> t=t+0.01 cls(1)
+		cart = string.gsub(cart, "(%d+%.?%d+)(%a)", "%1 %2")
+		
+		-- load cart
 		cart = assert(loadstring(cart))
 	end
 		
@@ -50,6 +65,8 @@ function M.run(cart)
 	end
 	env.rnd = math.random
 	env.max = math.max
+	env.min = math.min
+	env.abs = math.abs
 	env.cls = function(color)
 		color = color or 0
 		local col = PALETTE[math.floor(color)]
@@ -64,6 +81,20 @@ function M.run(cart)
 		color = color or 0
 		local col = PALETTE[math.floor(color)]
 		drawpixels.filled_circle(state.buffer_info, x, y, r * 2, col.r, col.g, col.b)
+	end
+	env.rect = function(x0, y0, x1, y1, color)
+		color = color or 0
+		local col = PALETTE[math.floor(color)]
+		local x0, x1 = math.min(x0, x1), math.max(x0, x1)
+		local y0, y1 = math.min(y0, y1), math.max(y0, y1)
+		drawpixels.rect(state.buffer_info, x0, y1, x1, y0, col.r, col.g, col.b)
+	end
+	env.rectfill = function(x0, y0, x1, y1, color)
+		color = color or 0
+		local col = PALETTE[math.floor(color)]
+		local x0, x1 = math.min(x0, x1), math.max(x0, x1)
+		local y0, y1 = math.min(y0, y1), math.max(y0, y1)
+		drawpixels.filled_rect(state.buffer_info, x0, y1, x1, y0, col.r, col.g, col.b)
 	end
 	env.pset = function(x, y, color)
 		color = color or 0
