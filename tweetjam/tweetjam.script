@@ -54,7 +54,8 @@ for b=0,1,.001 do
 	circ(64+k-s,64+j-s,1+2*s,8+l/4%3)
 end
 flip()
-goto _]]
+goto _ 
+]]
 
 local comets = [[
 l={10,9,8,2,1}
@@ -201,6 +202,115 @@ for j=1,12 do
 end
 flip()goto _ 
 ]]
+
+local glowworm = [[
+t=0
+::s::
+t-=.01
+is=t*50%30
+clr={8,9,10,11,12,2}
+for i=0,30,1 do
+	p0=64
+	d=32
+	t1=t-i*0.01
+	w=1+max(-abs(is-i)+1,0)
+	s=(512/(i*4))*w
+	x=64-sin(t1)*d
+	y=64+cos(-t1*2.0)*d
+	circfill(x,y,s,clr[1+i%6])
+end
+flip()
+goto s 
+]]
+
+
+local starfield = [[
+function tx(x,y,z)return 64+(64*x)/z,64+(64*-y)/z
+end
+::_::
+cls()
+srand()
+for i=1,500 do
+	r=rnd()x=cos(r)*rnd(4)y=sin(r)*rnd(4)z=(rnd(10)-t()*2)%10
+	w,q=tx(x,y,max(z,.15))d,e=tx(x,y,z+.15)
+	if (z<5)line(w,q,d,e,7)
+end
+flip()goto _ 
+]]
+
+local tunnel = [[
+t={}c=64q=96w=127l=line
+for i=0,11 do
+	add(t,{(2^0.5)^i,13-i%6})
+end
+::_::cls()l(0,0,c-1,q-1,1)l(c,q-1,w,0,1)l(0,w,c-1,q,1)l(c,q,w,w,1)
+for i=1,#t do
+	o=t[i]
+	x=o[1]
+	if(x>1)rect(c-x,q-x*1.5,c+x,q+x*0.5,o[2])
+	x*=2^(1/32)
+	if(x>c)x=1
+	o[1]=x
+end
+flip()goto _
+]]
+
+local lasershow = [[
+t={}w=128m=432l=200p=w/2
+for i=0,m/6-1 do
+	add(t,{i*6,8+i%6})
+end
+::_::cls(1)
+for i=#t,1,-1 do
+	o=t[i]a=o[1]/m
+	line(-16,p,l*cos(a),p-l*sin(a),o[2])
+	line(w+15,p,w-l*cos(a),p-l*sin(a),o[2])
+	o[1]+=1
+end
+flip()goto _
+]]
+
+local water = [[
+s,t,r,m,u,v=sin,0,8,rectfill,.32,1/32
+::_::t+=.01cls(1)
+m(33,0,94,127,12)
+for i=0,32 do
+	for j=0,r do
+		y,z=-t+1/r*j,i+1
+		m(64-i*.2+s(v*i*u+y)*32,(i*u)^2,64+i*.2+s(v*z*u+y)*32,(z*u)^2,7)
+	end
+	a=s(t*8+i*.03)*4
+	m(i*4,109+a,z*4,127,7)
+	m(i*4,116+a,z*4,127,12)
+end
+flip()
+goto _ 
+]]
+
+
+local sponge = [[
+s,c,l,t=sin,cos,line,0
+::_::t+=.005cls()
+function p(n,x,y,r,a,co)
+	for i=1,n do
+		b=i-1
+		j=b/n+a
+		k=i/n+a
+		d=x+c(j)*r
+		e=y+s(j)*r
+		f=x+c(k)*r
+		g=y+s(k)*r
+		local co+=1
+		l(d,e,f,g,co)
+		if co<12 then
+			p(n,d,e,r*.5,-a,co)
+		end
+	end
+end
+p(4,64,64,32,t,7)
+flip()goto _ 
+]]
+
 
 function init(self)
 	msg.post("pico8", "run_cart", { cart = rotating_lights })
