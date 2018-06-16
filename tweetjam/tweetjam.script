@@ -78,7 +78,7 @@ flip()goto _
 ]]
 
 
-local fun = [[
+local corkscrews = [[
 u=0
 ::_::
 cls(1)x=0 y=0
@@ -86,7 +86,6 @@ e=0.6*cos(u)
 for t=0,10,0.005 do
 	x=x+0.75*cos(e*t*sin(t)+(1-e)*t*cos(t))
 	y=y+0.75*sin(e*t*sin(t)+(1-e)*t*cos(t))
-	print(x,y)
 	pset(32+x+0.5*y,72+y-0.5*x,(t*20)%8+7)
 end
 u=u+0.005
@@ -312,6 +311,126 @@ flip()goto _
 ]]
 
 
+
+local evolving_color_flower = [[
+t=1
+::_::
+cls()
+t+=.02
+for r=8,40,8 do
+	x,y=0,0
+	d=r*sin(t/2)/2
+	for a=0,1,.01 do
+		n=64+(10+r)*cos(a)+d*sin(a*flr(t)+2*t)
+		m=64+(10+r)*sin(a)+d*cos(a*flr(t)+2*t)
+		if(x!=0)line(x,y,n,m,7+r/8)
+		x,y=n,m
+	end
+end
+flip()
+goto _ 
+]]
+
+
+local copperbar = [[
+t,r,z,q=0,rect,{7,10,9,4,1,0,1,2,13,14,15,7,7},64
+fillp(23130)::_::cls(5)t+=.01
+for x=-1,127 do
+	p=y or 1
+	y=cos(x/99+sin(t+x/q)*.2)*8
+	c=max(1,min(12,(y-p)*8+4))
+	r(x,q,x,-y+92,1*16+5)
+	r(x,q,x,-y+90,1)
+	r(x,q,x,-y+88,0)
+	r(x,y+46,x,y+76,z[flr(c)]+z[flr(c+.5)]*16)
+end
+flip()goto _
+]]
+
+local eyes_see_you = [[
+c=circfill
+poke(24365,1)
+::_::
+m=stat(32)n=stat(33)
+cls()
+for i=0,128,16 do
+	for j=0,128,14 do
+		x=j/14%2>=1 and i+8 or i
+		q,w=i-m,j-n
+		q/=28
+		w/=28
+		c(x,j,7,7)
+		c(x-q,j-w,4,12)
+		c(x-q,j-w,2,0)
+	end
+end
+c(m,n,2,8)
+flip()
+goto _ 
+]]
+
+
+local tail = [[
+function s(a,b,t)return a+t*(b-a)end
+r=64p=21l=line::q::cls(2)t=time()
+for i=0,p,.05 do
+	c=(p-i)*sin(i+t)
+	d=(p-i)*cos(i+t)
+	x=r+r*s(cos(i/r+t/6),0,i/r)
+	y=r+r*s(sin(i/r+t/4),0,i/r)
+	l(x,y,x+c,y+d,15)
+	x+=1
+	l(x,y,x+c,y+d,14)
+	y+=1
+	l(x,y,x+c,y+d,2)
+	x-=1
+	l(x,y,x+c,y+d,13)
+end
+flip()goto q
+]]
+
+
+local night_eruption = [[
+p={0x8400,0x8421,0x9c63,0xbde7,0xbdff,0xffff}
+i={0x01,0,0,0x10,0x21,0x82,0xe8,0x8e,0x28}
+t=0::a::
+for n=64,1,-1 do
+	f=n+t%1
+	q=f/64
+	r=f*f/28
+	y=50+sin(q+.1)*r
+	c=n-t
+	fillp(p[flr(c%#p)+1])
+	circfill(64,y,r,i[flr(c/#p)%#i+1])
+end
+t+=.2
+flip()goto a
+]]
+
+
+local tron = [[
+cls()d={-1,1,0,0,-1,1}p=print t=pget a,b,ad=88,88,1 x,y,xd=40,40,2::g::pset(a,b,3)pset(x,y,8)flip()for i=1,4 do 
+	if(btn(i-1,0))ad=i 
+	if(btn(i-1,1))xd=i 
+end a+=d[ad] b+=d[2+ad] x+=d[xd] y+=d[2+xd] if (t(a,b)<1 and t(x,y)<1) goto g 
+p("p1 wins?")p(t(x,y)<1) 
+]]
+
+
+local twodeearray = [[
+::_::
+cls()
+for i=1,550 do
+	t=i/999
+	t+=time()/10
+	x=cos(t)*i%128
+	y=sin(t)*i%128
+	circfill(x,y,i/5%9,i/99)
+end
+flip()
+goto _
+]]
+
 function init(self)
-	msg.post("pico8", "run_cart", { cart = rotating_lights })
+	msg.post("pico8", "run_cart", { cart = spiralwhirl })
 end

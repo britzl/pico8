@@ -21,10 +21,23 @@ PALETTE = {
 }
 
 
+local function get_color(i)
+	return PALETTE[math.min(math.max(math.floor(i or 0), 0), 15)]
+end
+
 local state = {
 	host_time = 0,
 	buffer_info = nil,
+	stat = {},
+	buttons = {},
 }
+
+for player=0,7 do
+	state.buttons[player] = {}
+	for button=0,5 do
+		state.buttons[player][button] = {}
+	end
+end
 
 function M.init(buffer_info)
 	state.buffer_info = buffer_info
@@ -44,11 +57,14 @@ function M.run(cart)
 		cart = string.gsub(cart, "([,=%+%-&*%/])%.(%d-)", "%10.%2")
 				
 		-- fix compact assignments c=64q=96w=127l=line
-		cart = string.gsub(cart, "([%a_][%a%d_]-)=(%d+)", "%1=%2 ")
+		cart = string.gsub(cart, "([%a_][%a%d_]-)=(%d+%.?%d*)", "%1=%2 ")
 
 		-- t=t+0.01cls(1) -> t=t+0.01 cls(1)
 		cart = string.gsub(cart, "(%d+%.?%d+)(%a)", "%1 %2")
-		
+
+		-- !=
+		cart = string.gsub(cart, "%!%=", "~=")
+
 		-- load cart
 		cart = assert(loadstring(cart))
 	end
@@ -66,54 +82,54 @@ function M.run(cart)
 	env.rnd = math.random
 	env.max = math.max
 	env.min = math.min
+	env.flr = math.floor
 	env.abs = math.abs
 	env.cls = function(color)
-		color = color or 0
-		local col = PALETTE[math.floor(color)]
+		local col = get_color(color)
 		drawpixels.fill(state.buffer_info, col.r, col.g, col.b)
 	end
 	env.circ = function(x, y, r, color)
-		color = color or 0
-		local col = PALETTE[math.floor(color)]
+		local col = get_color(color)
 		drawpixels.circle(state.buffer_info, x, y, r * 2, col.r, col.g, col.b)
 	end
 	env.circfill = function(x, y, r, color)
-		color = color or 0
-		local col = PALETTE[math.floor(color)]
+		local col = get_color(color)
 		drawpixels.filled_circle(state.buffer_info, x, y, r * 2, col.r, col.g, col.b)
 	end
-	env.rect = function(x0, y0, x1, y1, color)
-		color = color or 0
-		local col = PALETTE[math.floor(color)]
-		local x0, x1 = math.min(x0, x1), math.max(x0, x1)
-		local y0, y1 = math.min(y0, y1), math.max(y0, y1)
-		drawpixels.rect(state.buffer_info, x0, y1, x1, y0, col.r, col.g, col.b)
+	env.rect = function(x_upperleft, y_upperleft, x_lowerright, y_lowerright, color)
+		local col = get_color(color)
+		local xmin, xmax = math.min(x_upperleft, x_lowerright), math.max(x_upperleft, x_lowerright)
+		local ymin, ymax = math.min(y_upperleft, y_lowerright), math.max(y_upperleft, y_lowerright)
+		local w = xmax - xmin
+		local h = ymax - ymin
+		drawpixels.rect(state.buffer_info, xmin + (w / 2), ymin + (h / 2), w, h, col.r, col.g, col.b)
 	end
-	env.rectfill = function(x0, y0, x1, y1, color)
-		color = color or 0
-		local col = PALETTE[math.floor(color)]
-		local x0, x1 = math.min(x0, x1), math.max(x0, x1)
-		local y0, y1 = math.min(y0, y1), math.max(y0, y1)
-		drawpixels.filled_rect(state.buffer_info, x0, y1, x1, y0, col.r, col.g, col.b)
+	env.rectfill = function(x_upperleft, y_upperleft, x_lowerright, y_lowerright, color)
+		local col = get_color(color)
+		local xmin, xmax = math.min(x_upperleft, x_lowerright), math.max(x_upperleft, x_lowerright)
+		local ymin, ymax = math.min(y_upperleft, y_lowerright), math.max(y_upperleft, y_lowerright)
+		local w = xmax - xmin
+		local h = ymax - ymin
+		drawpixels.filled_rect(state.buffer_info, xmin + (w / 2), ymin + (h / 2), w, h, col.r, col.g, col.b)
 	end
 	env.pset = function(x, y, color)
-		color = color or 0
-		local col = PALETTE[math.floor(color)]
-		drawpixels.rect(state.buffer_info, x, y, 1, 1, col.r, col.g, col.b)
+		local col = get_color(color)
+		drawpixels.line(state.buffer_info, x, y, x, y, col.r, col.g, col.b)
 	end
 	env.line = function(x0, y0, x1, y1, color)
-		color = color or 0
-		local col = PALETTE[math.floor(color)]
+		local col = get_color(color)
 		drawpixels.line(state.buffer_info, x0, y0, x1, y1, col.r, col.g, col.b)
 	end
 	env.t = function() return state.host_time end
-	env.time = t
+	env.time = env.t
 	env.poke = function() print("Unsupported function poke") end
 	env.fillp = function() end
 	env.flip = function()
 		coroutine.yield()
 	end
 	env.add = table.insert
+	env.stat = function(i) return state.stat[i] end
+	env.btn = function(button, player) return state.buttons[player][button].pressed end
 
 	setmetatable(env, { __index = _G })
 	setfenv(cart, env)
@@ -133,6 +149,40 @@ function M.update(dt)
 			print(err)
 			state.co = nil
 		end
+	end
+end
+
+-- http://pico-8.wikia.com/wiki/Btn
+function M.on_input(action_id, action)
+	if not action_id or action_id == hash("touch") then
+		state.stat[32] = action.x / 4
+		state.stat[33] = action.y / 4
+	-- player 0
+	elseif action_id == hash("key_left") then
+		state.buttons[0][0] = action
+	elseif action_id == hash("key_right") then
+		state.buttons[0][1] = action
+	elseif action_id == hash("key_up") then
+		state.buttons[0][2] = action
+	elseif action_id == hash("key_down") then
+		state.buttons[0][3] = action
+	elseif action_id == hash("key_z") or action_id == hash("key_c") or action_id == hash("key_n") then
+		state.buttons[0][4] = action
+	elseif action_id == hash("key_x") or action_id == hash("key_v") or action_id == hash("key_m") then
+		state.buttons[0][5] = action
+	-- player 1
+	elseif action_id == hash("key_s") then
+		state.buttons[1][0] = action
+	elseif action_id == hash("key_f") then
+		state.buttons[1][1] = action
+	elseif action_id == hash("key_e") then
+		state.buttons[1][2] = action
+	elseif action_id == hash("key_d") then
+		state.buttons[1][3] = action
+	elseif action_id == hash("key_lshift") or action_id == hash("key_tab") then
+		state.buttons[1][4] = action
+	elseif action_id == hash("key_a") or action_id == hash("key_q") then
+		state.buttons[1][5] = action
 	end
 end
 

@@ -1,6 +1,6 @@
 [project]
-title = Tweetjam
-dependencies = 
+title = Pico8 Tweetjam API
+dependencies = https://github.com/britzl/defold-input/archive/1.3.0.zip,https://github.com/AGulev/drawpixels/archive/1.0.0.zip
 
 [bootstrap]
 main_collection = /tweetjam/tweetjam.collectionc
@@ -13,4 +13,14 @@ height = 512
 [graphics]
 default_texture_min_filter = nearest
 default_texture_mag_filter = nearest
+
+[input]
+game_binding = /in/bindings/all.input_bindingc
+gamepads = /in/gamepads/in.gamepadsc
+
+[script]
+shared_state = 1
+
+[library]
+include_dirs = pico8
 
