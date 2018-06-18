@@ -431,6 +431,204 @@ flip()
 goto _
 ]]
 
-function init(self)
-	msg.post("pico8", "run_cart", { cart = spiralwhirl })
+
+local i_miss_rain = [[
+::_::
+cls()
+srand()
+f=t()*24
+for i=0,199 do
+	x=rnd(128)
+	y=rnd(128)
+	m=flr(rnd(8))+6
+	for n=m,1,-1 do
+		z=(x+f-n/4)%128
+		w=(y+f*4-n)%128
+		c=7
+		if(n>1)c=12
+		if(n/m>.6)c=1
+		pset(z,w,c)
+		pset((rnd(128)+f/10-n/4)%128,
+		(rnd(128)+f/10-n)%128,
+		1)
+	end
 end
+flip()goto _ 
+]]
+
+local yo = [[
+--yo
+t,q,c=0,sin,circfill::_::t+=.01cls(1)for i=0,128 do
+	s=cos(t+i/25)y=i*2-(t%1*100)
+	a=64+47*q(t+i/25)b=10+i/8.3%3
+	if(s<=0)fillp(23130.5)
+	c(a,y,3.75+s,b)fillp()end
+	for j=-10,2800 do
+		k=59+j%10+q(-t*1+j/3)*39l=j/10+flr(t*50)%2
+		c(k,l,0,pget(k,l)+12)end
+		flip()goto _
+]]
+
+local plant = [[
+f=circfill
+::_::
+cls(1)
+srand()
+for n=0,14 do
+	x=64y=120r=.25z=x
+	w=y
+	for d=0,20 do
+		s=.1+(sin(t()/8)/40-1/80)
+		r+=rnd()*s-(s/2)+sin(t()/4)/800
+		z=x
+		w=y
+		x+=5*cos(r)y+=5*sin(r)f(x,y,5,0x28)u=cos(r+.25)v=sin(r+.25)line(z+u*5,w+v*5,x+u*5,y+v*5,14)end
+	end
+	flip()goto _ 
+]]
+
+local rotating_stars = [[
+d={0,0,0,0,0,0,0,0,1,1,1,2,2}::_::srand()cls()for i=1,300 do
+	s=d[flr(rnd(#d))+1]r=rnd((s+1)*30)f=rnd(1)+t()/(r*r)*25
+	x=64+r*cos(f)y=64+r*sin(f)circfill(x,y,(sin(t()+rnd())+1),7)
+end
+flip()goto _
+]]
+
+local snowsled = [[
+c,t,m,o=cos,0,127,circfill::_::t+=.02
+cls(12)srand()
+function z(e)
+	a=c(e/m+t)*8+e/3
+end
+b=42+8*c(t)z(b)o(b,60+a,3,3)o(b+2,55+a,2,15)
+for i=0,m do
+	x=rnd(m)y=rnd(m)x+=c(t+y/8)*3-t*m
+	y+=t*9
+	x,y=x%m,y%m
+	z(i)line(i,64+a,i,m,7)o(x,y,0,7)b=35+i/8+8*c(t)z(b)o(b,62+a,1,8)
+end
+flip()goto _
+]]
+
+
+local redblobs = [[
+e=2.7183
+l={8,12,11}
+::_::
+cls(8)
+for n=4,0,-1 do
+	for i=60,200,1 do
+		r=i*(1/e)+n/4
+		a=r+t()/e
+		o=i*r/64+(20*(sin(t()/15)+1)/2)
+		x=cos(a)y=sin(a)
+		circfill(64+x*o,64+y*o,4-sin((o+t()*20)/10)*4,14)
+	end
+end
+flip()goto _ 
+]]
+
+local window = [[
+t,c,s,q=0,cos,sin,rectfill::_::cls(1)t+=.02
+a=81
+q(32,32,96,96,12)
+q(33,64,95,68,2)
+q(32,96,96,100,2)
+for i=1,a do
+	line(
+	32+i*.8,32+s(t+i/a)*s(t+i/a/3)*2,
+	8+i+c(t+i/a/4)*5,
+	96+s(t+i/a*2)*c(t+i/a/2)*8,8)
+	q(0,i*2,127,i*2,1)
+end
+flip()goto _ 
+]]
+
+local curve = [[
+v={}for i=0,90 do
+add(v,cos(i/20))add(v,cos(i/90))add(v,sin(i/30))end
+function x(y,n)a=v[y*3+1]z=v[y*3+3]w=cos(n)*a-z*sin(n)q=sin(n)*a+cos(n)*z+2.3return 64+64*w/q,64+64*v[y*3+2]/q
+end::_::cls()f=.1*t()for j=0,#v/3-2 do
+	c,d=x(j,f)g,h=x(j+1,f)line(c,d,g,h,11)
+end
+flip()goto _
+]]
+
+
+local wovenpattern = [[
+x=rnd(128)
+y=rnd(128)
+a=rnd()
+c=8
+cls()
+s=3
+t=0
+::_::
+t+=1
+x+=s*cos(a)
+y+=s*sin(a)
+if x<=0 or x>=127 then
+	a=.5-a
+	c=c%15+1
+end
+if y<=0 or y>=127 then
+	a*=-1
+	c=c%15+1
+end
+circfill(x,y,2,c)
+if t>100 then
+	flip()
+	t=0
+end
+goto _ 
+]]
+
+local dancingcircles = [[
+::_::
+cls()
+for i=-6,134,6 do
+	for j=-6,134,6 do
+		n,m=64-i,64-j
+		r=sqrt(n*n+m*m)/64
+		a=atan2(n,m)
+		x=i+4*r*cos(a*7+t())
+		y=j+4*r*sin(a*7+t())
+		circ(x,y,2,7)
+	end
+end
+flip()
+goto _ 
+]]
+
+
+local interlocked_rings = [[
+::_::cls()for a=0,1,.01 do
+for b=0,6 do
+	d=b/6+time()/3
+	circfill(64+16*cos(d)+48*cos(a+d),64+16*sin(d)+48*sin(a+d),3,7+b)end
+end
+flip()goto _
+]]
+
+
+local infinite_cinammon_roll = [[
+t=0::_::cls(4)t+=.03
+for r=0,140,.06 do
+a=r/9-t*2
+d=5-r/40
+e=t-r/60
+pset(64+r*cos(a)+d*sin(e),64+r/2*sin(a)+d*cos(e),7)end
+flip()goto _
+]]
+
+
+function init(self)
+	msg.post("pico8", "run_cart", { cart = infinite_cinammon_roll })
+end
+
+
+
+
+
+
