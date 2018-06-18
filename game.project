@@ -1,6 +1,6 @@
 [project]
 title = Pico8 Tweetjam API
-dependencies = https://github.com/britzl/defold-input/archive/1.3.0.zip,https://github.com/AGulev/drawpixels/archive/1.0.0.zip
+dependencies = https://github.com/britzl/defold-input/archive/1.3.0.zip,https://github.com/AGulev/drawpixels/archive/1.1.0.zip
 
 [bootstrap]
 main_collection = /tweetjam/tweetjam.collectionc

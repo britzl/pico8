@@ -117,6 +117,18 @@ function M.run(cart)
 	env.pset = function(x, y, color)
 		local col = get_color(color)
 		drawpixels.line(state.buffer_info, x, y, x, y, col.r, col.g, col.b)
+		drawpixels.pixel(state.buffer_info, x, y, col.r, col.g, col.b)
+	end
+	env.pget = function(x, y, color)
+		x = x - state.draw.camera.x
+		y = (128 - y) - state.draw.camera.y
+		local r, g, b = drawpixels.color(state.buffer_info, x, y)
+		for i=0,#PALETTE do
+			if PALETTE[i].r == r and PALETTE[i].g == g and PALETTE[i].b == b then
+				return i
+			end
+		end
+		return 0
 	end
 	env.line = function(x0, y0, x1, y1, color)
 		local col = get_color(color)
