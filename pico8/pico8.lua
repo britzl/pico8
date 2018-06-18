@@ -79,7 +79,9 @@ function M.run(cart)
 		if seed == 0 then seed = 1 end
 		math.randomseed(math.floor(seed*32768))
 	end
-	env.rnd = math.random
+	env.rnd = function(max)
+		if not max then return math.random() else return math.random(0, max - 1) end
+	end
 	env.max = math.max
 	env.min = math.min
 	env.flr = math.floor
