@@ -20,16 +20,27 @@ PALETTE = {
 	[15] = { r = 255, g = 204, b = 170 },	-- peach
 }
 
-
-local function get_color(i)
-	return PALETTE[math.min(math.max(math.floor(i or 0), 0), 15)]
-end
-
 local state = {
 	host_time = 0,
 	buffer_info = nil,
 	stat = {},
 	buttons = {},
+	draw = {
+		color = 0,
+		camera = {
+			x = 0,
+			y = 0,
+		},
+		cursor = {
+			x = 0,
+			y = 0,
+		},
+		clipping = {
+		},
+		palette = {
+		},
+		fill_pattern = nil,
+	}
 }
 
 for player=0,7 do
@@ -38,6 +49,11 @@ for player=0,7 do
 		state.buttons[player][button] = {}
 	end
 end
+
+local function get_color(i)
+	return PALETTE[math.min(math.max(math.floor(i or state.draw.color), 0), 15)]
+end
+
 
 function M.init(buffer_info)
 	state.buffer_info = buffer_info
@@ -86,16 +102,29 @@ function M.run(cart)
 	env.min = math.min
 	env.flr = math.floor
 	env.abs = math.abs
+	env.color = function(color)
+		state.draw.color = get_color(color)
+	end
+	env.camera = function(x, y)
+		state.draw.camera.x = x
+		state.draw.camera.y = y
+	end
 	env.cls = function(color)
+		state.draw.cursor.x = 0
+		state.draw.cursor.y = 0
 		local col = get_color(color)
 		drawpixels.fill(state.buffer_info, col.r, col.g, col.b)
 	end
 	env.circ = function(x, y, r, color)
 		local col = get_color(color)
+		x = x - state.draw.camera.x
+		y = (128 - y) - state.draw.camera.y
 		drawpixels.circle(state.buffer_info, x, y, r * 2, col.r, col.g, col.b)
 	end
 	env.circfill = function(x, y, r, color)
-		local col = get_color(color)
+		local col = get_color(bit.band(color, 0x0F))
+		x = x - state.draw.camera.x
+		y = (128 - y) - state.draw.camera.y
 		drawpixels.filled_circle(state.buffer_info, x, y, r * 2, col.r, col.g, col.b)
 	end
 	env.rect = function(x_upperleft, y_upperleft, x_lowerright, y_lowerright, color)
@@ -104,19 +133,24 @@ function M.run(cart)
 		local ymin, ymax = math.min(y_upperleft, y_lowerright), math.max(y_upperleft, y_lowerright)
 		local w = xmax - xmin
 		local h = ymax - ymin
-		drawpixels.rect(state.buffer_info, xmin + (w / 2), ymin + (h / 2), w, h, col.r, col.g, col.b)
+		local x = xmin + (w / 2) - state.draw.camera.x
+		local y = (128 - ymax) + (h / 2) - state.draw.camera.y
+		drawpixels.rect(state.buffer_info, x, y, w, h, col.r, col.g, col.b)
 	end
 	env.rectfill = function(x_upperleft, y_upperleft, x_lowerright, y_lowerright, color)
-		local col = get_color(color)
+		local col = get_color(bit.band(color, 0x0F))
 		local xmin, xmax = math.min(x_upperleft, x_lowerright), math.max(x_upperleft, x_lowerright)
 		local ymin, ymax = math.min(y_upperleft, y_lowerright), math.max(y_upperleft, y_lowerright)
 		local w = xmax - xmin
 		local h = ymax - ymin
-		drawpixels.filled_rect(state.buffer_info, xmin + (w / 2), ymin + (h / 2), w, h, col.r, col.g, col.b)
+		local x = xmin + (w / 2) - state.draw.camera.x
+		local y = (128 - ymax) + (h / 2) - state.draw.camera.y
+		drawpixels.filled_rect(state.buffer_info, x, y, w, h, col.r, col.g, col.b, nil, nil)
 	end
 	env.pset = function(x, y, color)
+		x = x - state.draw.camera.x
+		y = (128 - y) - state.draw.camera.y
 		local col = get_color(color)
-		drawpixels.line(state.buffer_info, x, y, x, y, col.r, col.g, col.b)
 		drawpixels.pixel(state.buffer_info, x, y, col.r, col.g, col.b)
 	end
 	env.pget = function(x, y, color)
@@ -132,12 +166,22 @@ function M.run(cart)
 	end
 	env.line = function(x0, y0, x1, y1, color)
 		local col = get_color(color)
+		x0 = x0 - state.draw.camera.x
+		y0 = (128 - y0) - state.draw.camera.y
+		x1 = x1 - state.draw.camera.x
+		y1 = (128 - y1) - state.draw.camera.x
 		drawpixels.line(state.buffer_info, x0, y0, x1, y1, col.r, col.g, col.b)
 	end
 	env.t = function() return state.host_time end
 	env.time = env.t
 	env.poke = function() print("Unsupported function poke") end
-	env.fillp = function() end
+	env.fillp = function(pat)
+		state.draw.fill = pat
+	end
+	env.cursor = function(x, y)
+		state.draw.cursor.x = x
+		state.draw.cursor.y = y
+	end
 	env.flip = function()
 		coroutine.yield()
 	end
@@ -170,7 +214,7 @@ end
 function M.on_input(action_id, action)
 	if not action_id or action_id == hash("touch") then
 		state.stat[32] = action.x / 4
-		state.stat[33] = action.y / 4
+		state.stat[33] = 128 - (action.y / 4)
 	-- player 0
 	elseif action_id == hash("key_left") then
 		state.buttons[0][0] = action
