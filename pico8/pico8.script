@@ -27,8 +27,8 @@ function init(self)
 	self.header = {
 		width = width,
 		height = height,
-		type = resource.TEXTURE_TYPE_2D,
-		format = resource.TEXTURE_FORMAT_RGB,
+		type = graphics.TEXTURE_TYPE_2D,
+		format = graphics.TEXTURE_FORMAT_RGB,
 		num_mip_maps = 1
 	}
 
